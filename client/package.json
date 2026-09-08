@@ -1,5 +1,5 @@
 {
-  "name": "day-status-tracker",
+  "name": "statusboard",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
