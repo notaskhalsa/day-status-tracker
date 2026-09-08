@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int          @id @default(autoincrement())
+  email        String       @unique @db.VarChar(255)
+  passwordHash String       @map("password_hash") @db.VarChar(255)
+  name         String       @db.VarChar(100)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  statusData   StatusData[] @relation("UserStatus")
+  updatedData  StatusData[] @relation("UpdatedByUser")
+
+  @@index([email], name: "idx_users_email")
+  @@map("users")
+}
+
+model StatusData {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  dataKey     String   @map("data_key") @db.VarChar(50)
+  statusValue String   @map("status_value") @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  updatedBy   Int      @map("updated_by")
+
+  user        User     @relation("UserStatus", fields: [userId], references: [id], onDelete: Cascade)
+  updater     User     @relation("UpdatedByUser", fields: [updatedBy], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dataKey], name: "unique_user_date")
+  @@index([dataKey], name: "idx_status_data_key")
+  @@index([userId], name: "idx_status_data_user")
+  @@map("status_data")
+}
